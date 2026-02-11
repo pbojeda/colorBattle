@@ -3,13 +3,25 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const http = require('http');
+const { Server } = require('socket.io');
 const Battle = require('./models/Battle');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// Create HTTP server & Socket.io
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -118,6 +130,21 @@ app.post('/api/battle/:battleId/vote', async (req, res) => {
         battle.votes.set(deviceId, optionId);
         await battle.save();
 
+        // Broadcast update via Socket.io
+        const totalVotes = battle.options.reduce((acc, opt) => acc + opt.votes, 0);
+        const optionsWithStats = battle.options.map(opt => ({
+            id: opt.id,
+            name: opt.name,
+            votes: opt.votes,
+            percentage: totalVotes === 0 ? 50 : Math.round((opt.votes / totalVotes) * 100)
+        }));
+
+        io.emit('vote_update', {
+            battleId,
+            options: optionsWithStats,
+            totalVotes
+        });
+
         res.json({ success: true, optionId });
 
     } catch (err) {
@@ -126,6 +153,14 @@ app.post('/api/battle/:battleId/vote', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+// Socket.io Connection Logic
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
+
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

@@ -3,6 +3,8 @@ import axios from 'axios';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { BattleArena } from './components/BattleArena';
 
+import { io } from 'socket.io-client';
+
 // Config
 import API_URL_BASE from './api/config';
 const API_URL = `${API_URL_BASE}/api`;
@@ -24,7 +26,7 @@ function App() {
     setFp();
   }, []);
 
-  // 2. Poll for updates (Real-time-ish)
+  // 2. Poll for updates (Fallback) + WebSockets (Real-time)
   useEffect(() => {
     if (!deviceId) return;
 
@@ -42,9 +44,38 @@ function App() {
     };
 
     fetchData(); // Initial fetch
-    const interval = setInterval(fetchData, 2000); // Poll every 2s
 
-    return () => clearInterval(interval);
+    // WebSocket Connection
+    const socket = io(API_URL_BASE);
+
+    socket.on('connect', () => {
+      console.log('Connected to WebSocket');
+      socket.emit('join_battle', BATTLE_ID);
+    });
+
+    socket.on('vote_update', (newData) => {
+      // Merge with existing userVote to not lose context, though full refresh is safer
+      // newData contains { battleId, options, totalVotes }
+      // We preserve the current userVote from state or fetch it again if needed.
+      // For simplicity, we just update the stats part of the state
+      setBattleData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          options: newData.options,
+          totalVotes: newData.totalVotes
+          // userVote remains as is from local state/initial fetch
+        };
+      });
+    });
+
+    // Fallback Polling (slower, just in case socket fails)
+    const interval = setInterval(fetchData, 10000);
+
+    return () => {
+      clearInterval(interval);
+      socket.disconnect();
+    };
   }, [deviceId]);
 
   // 3. Handle Vote
