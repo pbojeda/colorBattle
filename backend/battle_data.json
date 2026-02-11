@@ -1,0 +1,18 @@
+{
+  "battleId": "red-vs-blue",
+  "options": [
+    {
+      "id": "red",
+      "name": "Equipo Rojo",
+      "votes": 0
+    },
+    {
+      "id": "blue",
+      "name": "Equipo Azul",
+      "votes": 1
+    }
+  ],
+  "votes": {
+    "cce1ad0e566472a24fa609ed9fd96a84": "blue"
+  }
+}
