@@ -1,5 +1,11 @@
 require('dotenv').config();
 const Sentry = require("@sentry/node");
+
+Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    tracesSampleRate: 1.0,
+});
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -7,11 +13,6 @@ const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
 const Battle = require('./models/Battle');
-
-Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    tracesSampleRate: 1.0,
-});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,11 @@ app.use(bodyParser.json());
 
 // Health Check for UptimeRobot
 app.get('/health', (req, res) => res.status(200).send('OK'));
+
+// Sentry Debug Endpoint (Restored for troubleshooting)
+app.get("/debug-sentry", function mainHandler(req, res) {
+    throw new Error("My first Sentry error!");
+});
 
 // Create HTTP server & Socket.io
 const server = http.createServer(app);
