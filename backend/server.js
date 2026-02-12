@@ -1,4 +1,5 @@
 require('dotenv').config();
+const Sentry = require("@sentry/node");
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -7,12 +8,25 @@ const http = require('http');
 const { Server } = require('socket.io');
 const Battle = require('./models/Battle');
 
+Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    tracesSampleRate: 1.0,
+});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Sentry Request Handler (must be the first middleware on the app)
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// Health Check for UptimeRobot
+app.get('/health', (req, res) => res.status(200).send('OK'));
 
 // Create HTTP server & Socket.io
 const server = http.createServer(app);
@@ -160,6 +174,9 @@ io.on('connection', (socket) => {
         console.log('User disconnected:', socket.id);
     });
 });
+
+// Sentry Error Handler (must be before any other error middleware)
+app.use(Sentry.Handlers.errorHandler());
 
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
