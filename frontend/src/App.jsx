@@ -111,12 +111,22 @@ function App() {
   if (!battleData) return <div className="text-white">Failed to load battle.</div>;
 
   return (
-    <BattleArena
-      options={battleData.options}
-      totalVotes={battleData.totalVotes}
-      userVote={battleData.userVote}
-      onVote={handleVote}
-    />
+    <div className="flex flex-col items-center">
+      <BattleArena
+        options={battleData.options}
+        totalVotes={battleData.totalVotes}
+        userVote={battleData.userVote}
+        onVote={handleVote}
+      />
+
+      {/* Sentry Test Button (Dev Only) */}
+      <button
+        className="mt-4 px-4 py-2 bg-gray-800 text-gray-400 text-xs rounded hover:bg-red-900 hover:text-white transition-colors"
+        onClick={() => { throw new Error('Frontend Sentry Test Error!'); }}
+      >
+        Break Frontend
+      </button>
+    </div>
   );
 }
 
