@@ -16,10 +16,8 @@ Sentry.init({
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Sentry Request Handler (must be the first middleware on the app)
-app.use(Sentry.Handlers.requestHandler());
-// TracingHandler creates a trace for every incoming request
-app.use(Sentry.Handlers.tracingHandler());
+// Sentry Setup for Express (v8+)
+Sentry.setupExpressErrorHandler(app);
 
 // Middleware
 app.use(cors());
@@ -174,9 +172,6 @@ io.on('connection', (socket) => {
         console.log('User disconnected:', socket.id);
     });
 });
-
-// Sentry Error Handler (must be before any other error middleware)
-app.use(Sentry.Handlers.errorHandler());
 
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
