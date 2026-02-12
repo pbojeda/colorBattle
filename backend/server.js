@@ -27,11 +27,6 @@ app.use(bodyParser.json());
 // Health Check for UptimeRobot
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
-// Sentry Debug Endpoint (Restored for troubleshooting)
-app.get("/debug-sentry", function mainHandler(req, res) {
-    throw new Error("My first Sentry error!");
-});
-
 // Create HTTP server & Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
