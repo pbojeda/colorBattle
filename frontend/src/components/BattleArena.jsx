@@ -11,7 +11,7 @@ import API_URL from '../api/config';
 import popSound from '../assets/sounds/pop.wav';
 import cheerSound from '../assets/sounds/cheer.mp3';
 
-export function BattleArena({ options, onVote, userVote, totalVotes }) {
+export function BattleArena({ options, onVote, userVote, totalVotes, battleName }) {
     const [left, right] = options;
     const leftPercent = left.percentage || 50;
     const rightPercent = right.percentage || 50;
@@ -94,7 +94,7 @@ export function BattleArena({ options, onVote, userVote, totalVotes }) {
             <ShareButton options={options} />
 
             <h1 className="absolute top-4 md:top-8 left-0 right-0 text-center text-2xl md:text-4xl font-bold z-20 drop-shadow-lg uppercase tracking-widest pointer-events-none mix-blend-overlay">
-                Batalla de Colores
+                {battleName || "Batalla de Colores"}
             </h1>
 
             {/* LEFT SIDE (Red) */}

@@ -7,6 +7,7 @@ const OptionSchema = new mongoose.Schema({
 });
 
 const BattleSchema = new mongoose.Schema({
+    name: { type: String, required: true },
     battleId: { type: String, required: true, unique: true },
     options: [OptionSchema],
     votes: {
