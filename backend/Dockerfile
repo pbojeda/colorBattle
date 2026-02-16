@@ -2,7 +2,18 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package.json ./
+# Install build dependencies for node-canvas
+RUN apk add --no-cache \
+    build-base \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev \
+    python3 \
+    make
+
+COPY package*.json ./
 RUN npm install
 
 COPY . .
