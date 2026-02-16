@@ -6,14 +6,16 @@ class BattleController {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
             const skip = (page - 1) * limit;
+            const excludeIds = req.query.excludeIds ? req.query.excludeIds.split(',') : [];
 
-            const battles = await BattleService.getAllBattles(skip, limit);
+            const battles = await BattleService.getAllBattles(skip, limit, excludeIds);
 
             const battlesWithStats = battles.map(battle => {
                 const totalVotes = battle.options.reduce((acc, opt) => acc + opt.votes, 0);
                 return {
                     battleId: battle.battleId,
                     name: battle.name,
+                    theme: battle.theme,
                     totalVotes,
                     options: battle.options.map(o => ({ id: o.id, name: o.name }))
                 };
@@ -33,6 +35,7 @@ class BattleController {
                 return {
                     battleId: battle.battleId,
                     name: battle.name,
+                    theme: battle.theme,
                     totalVotes: battle.totalVotes,
                     options: battle.options.map(o => ({ id: o.id, name: o.name }))
                 };
@@ -53,17 +56,43 @@ class BattleController {
             if (!battle) return res.status(404).json({ error: 'Battle not found' });
 
             const totalVotes = battle.options.reduce((acc, opt) => acc + opt.votes, 0);
-            const optionsWithStats = battle.options.map(opt => ({
+
+            // Calculate raw percentages
+            let optionsWithStats = battle.options.map(opt => ({
                 id: opt.id,
                 name: opt.name,
                 votes: opt.votes,
-                percentage: totalVotes === 0 ? 50 : Math.round((opt.votes / totalVotes) * 100)
+                percentage: totalVotes === 0 ? 50 : (opt.votes / totalVotes) * 100
             }));
+
+            // Smart Rounding to avoid 50/50 ties
+            if (totalVotes > 0 && optionsWithStats.length === 2) {
+                const [opt1, opt2] = optionsWithStats;
+
+                // If votes are different but both round to 50%
+                if (opt1.votes !== opt2.votes && Math.round(opt1.percentage) === 50) {
+                    if (opt1.votes > opt2.votes) {
+                        opt1.percentage = 51;
+                        opt2.percentage = 49;
+                    } else {
+                        opt1.percentage = 49;
+                        opt2.percentage = 51;
+                    }
+                } else {
+                    opt1.percentage = Math.round(opt1.percentage);
+                    opt2.percentage = Math.round(opt2.percentage);
+                }
+            } else {
+                // Fallback for >2 options (simple round)
+                optionsWithStats.forEach(o => o.percentage = Math.round(o.percentage));
+            }
 
             const userVote = deviceId && battle.votes ? battle.votes.get(deviceId) : null;
 
             res.json({
                 battleId,
+                name: battle.name,
+                theme: battle.theme,
                 options: optionsWithStats,
                 totalVotes,
                 userVote
@@ -85,6 +114,7 @@ class BattleController {
             res.status(201).json({
                 battleId: newBattle.battleId,
                 name: newBattle.name,
+                theme: newBattle.theme,
                 message: 'Battle created successfully'
             });
         } catch (err) {
@@ -112,12 +142,36 @@ class BattleController {
 
             // Prepare Broadcast Data
             const totalVotes = battle.options.reduce((acc, opt) => acc + opt.votes, 0);
-            const optionsWithStats = battle.options.map(opt => ({
+
+            // Calculate raw percentages
+            let optionsWithStats = battle.options.map(opt => ({
                 id: opt.id,
                 name: opt.name,
                 votes: opt.votes,
-                percentage: totalVotes === 0 ? 50 : Math.round((opt.votes / totalVotes) * 100)
+                percentage: totalVotes === 0 ? 50 : (opt.votes / totalVotes) * 100
             }));
+
+            // Smart Rounding to avoid 50/50 ties
+            if (totalVotes > 0 && optionsWithStats.length === 2) {
+                const [opt1, opt2] = optionsWithStats;
+
+                // If votes are different but both round to 50%
+                if (opt1.votes !== opt2.votes && Math.round(opt1.percentage) === 50) {
+                    if (opt1.votes > opt2.votes) {
+                        opt1.percentage = 51;
+                        opt2.percentage = 49;
+                    } else {
+                        opt1.percentage = 49;
+                        opt2.percentage = 51;
+                    }
+                } else {
+                    opt1.percentage = Math.round(opt1.percentage);
+                    opt2.percentage = Math.round(opt2.percentage);
+                }
+            } else {
+                // Fallback for >2 options (simple round)
+                optionsWithStats.forEach(o => o.percentage = Math.round(o.percentage));
+            }
 
             // Broadcast
             io.to(battleId).emit('vote_update', {

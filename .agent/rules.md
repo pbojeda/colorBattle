@@ -23,3 +23,23 @@ These rules are established to ensure code quality, stability, and maintainabili
 ## 5. Security First
 - **Rule**: Never commit `.env` files or secrets.
 - **Action**: Always double-check `git status` before adding. Use environment variables for all secrets.
+
+## 6. Code Quality & Standards (v4+)
+- **Rule**: Follow consistent coding styles and best practices.
+- **Action**:
+    - **Linting**: Ensure `eslint` passes before commit.
+    - **Formatting**: Use Prettier (or similar) for consistent formatting.
+    - **Clean Code**: Meaningful variable names, small functions, DRY principle.
+
+## 7. Architecture Patterns
+- **Rule**: Maintain strict separation of concerns.
+- **Action**:
+    - Backend: Controller -> Service -> Model.
+    - Frontend: Components -> Custom Hooks (Logic) -> API Layer.
+
+## 8. Testing Strategy
+- **Rule**: Test critical paths and complex logic.
+- **Action**:
+    - **Unit**: Test utility functions and complex service logic (v6 goal, start small).
+    - **Integration**: Test API endpoints (v6 goal).
+    - **E2E**: Validate core user flows (Creating battle, Voting) (v6 goal).

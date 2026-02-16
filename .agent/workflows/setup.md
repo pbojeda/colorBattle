@@ -43,6 +43,7 @@ VITE_SENTRY_DSN=<your-frontend-dsn>
 PORT=3000
 MONGO_URI=<your-mongodb-uri>
 SENTRY_DSN=<your-backend-dsn>
+GEMINI_API_KEY=<your-gemini-api-key> # For v4 AI Features (Google Generative AI)
 ```
 
 ## 4. Run Locally

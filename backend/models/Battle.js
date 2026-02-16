@@ -13,6 +13,11 @@ const BattleSchema = new mongoose.Schema({
     votes: {
         type: Map,
         of: String // deviceId -> optionId
+    },
+    theme: {
+        optionAColor: { type: String, default: "#ef4444" },
+        optionBColor: { type: String, default: "#3b82f6" },
+        background: { type: String, default: "linear-gradient(to right, #1f2937, #111827)" }
     }
 });
 

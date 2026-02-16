@@ -11,7 +11,13 @@ import API_URL from '../api/config';
 import popSound from '../assets/sounds/pop.wav';
 import cheerSound from '../assets/sounds/cheer.mp3';
 
-export function BattleArena({ options, onVote, userVote, totalVotes, battleName }) {
+export function BattleArena({ options, onVote, userVote, totalVotes, battleName, theme }) {
+    // Default theme fallback
+    const safeTheme = theme || {
+        optionAColor: '#ef4444',
+        optionBColor: '#3b82f6',
+        background: 'linear-gradient(to right, #1f2937, #111827)'
+    };
     const [left, right] = options;
     const leftPercent = left.percentage || 50;
     const rightPercent = right.percentage || 50;
@@ -72,7 +78,8 @@ export function BattleArena({ options, onVote, userVote, totalVotes, battleName 
             playCheer();
 
             // Determine winner color for confetti
-            const color = userVote === left.id ? '#ef4444' : '#3b82f6'; // Red or Blue
+            // Determine winner color for confetti
+            const color = userVote === left.id ? safeTheme.optionAColor : safeTheme.optionBColor;
 
             confetti({
                 particleCount: 150,
@@ -90,17 +97,20 @@ export function BattleArena({ options, onVote, userVote, totalVotes, battleName 
     };
 
     return (
-        <div className="flex flex-col md:flex-row w-full h-full bg-gray-900 text-white overflow-hidden relative">
+        <div
+            className="flex flex-col md:flex-row w-full h-full text-white overflow-hidden relative"
+            style={{ background: safeTheme.background }}
+        >
             <ShareButton options={options} />
 
             <h1 className="absolute top-4 md:top-8 left-0 right-0 text-center text-2xl md:text-4xl font-bold z-20 drop-shadow-lg uppercase tracking-widest pointer-events-none mix-blend-overlay">
                 {battleName || "Batalla de Colores"}
             </h1>
 
-            {/* LEFT SIDE (Red) */}
+            {/* LEFT SIDE (Option A) */}
             <motion.div
-                className="relative flex flex-col items-center justify-center cursor-pointer group w-full md:h-full bg-red-500 overflow-hidden"
-                style={{ flex: leftFlex }}
+                className="relative flex flex-col items-center justify-center cursor-pointer group w-full md:h-full overflow-hidden"
+                style={{ flex: leftFlex, backgroundColor: safeTheme.optionAColor }}
                 onClick={() => handleVote(left.id)}
                 onMouseEnter={() => playPop()}
                 whileHover={{ scale: 1.05, zIndex: 20 }} // More dramatic hover
@@ -113,7 +123,7 @@ export function BattleArena({ options, onVote, userVote, totalVotes, battleName 
                     <div className="text-xs md:text-sm opacity-75">{left.votes} votos</div>
 
                     {userVote === left.id && (
-                        <div className="mt-2 md:mt-4 bg-white text-red-600 px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider shadow-lg inline-block animate-[bounce_1s_infinite]">
+                        <div className="mt-2 md:mt-4 bg-white px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider shadow-lg inline-block animate-[bounce_1s_infinite]" style={{ color: safeTheme.optionAColor }}>
                             Has Votado
                         </div>
                     )}
@@ -126,10 +136,10 @@ export function BattleArena({ options, onVote, userVote, totalVotes, battleName 
                 VS
             </div>
 
-            {/* RIGHT SIDE (Blue) */}
+            {/* RIGHT SIDE (Option B) */}
             <motion.div
-                className="relative flex flex-col items-center justify-center cursor-pointer group w-full md:h-full bg-blue-500 overflow-hidden"
-                style={{ flex: rightFlex }}
+                className="relative flex flex-col items-center justify-center cursor-pointer group w-full md:h-full overflow-hidden"
+                style={{ flex: rightFlex, backgroundColor: safeTheme.optionBColor }}
                 onClick={() => handleVote(right.id)}
                 onMouseEnter={() => playPop()}
                 whileHover={{ scale: 1.05, zIndex: 20 }}
@@ -142,7 +152,7 @@ export function BattleArena({ options, onVote, userVote, totalVotes, battleName 
                     <div className="text-xs md:text-sm opacity-75">{right.votes} votos</div>
 
                     {userVote === right.id && (
-                        <div className="mt-2 md:mt-4 bg-white text-blue-600 px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider shadow-lg inline-block animate-[bounce_1s_infinite]">
+                        <div className="mt-2 md:mt-4 bg-white px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider shadow-lg inline-block animate-[bounce_1s_infinite]" style={{ color: safeTheme.optionBColor }}>
                             Has Votado
                         </div>
                     )}

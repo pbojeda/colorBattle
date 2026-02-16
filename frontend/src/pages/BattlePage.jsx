@@ -129,6 +129,7 @@ function BattlePage() {
                 userVote={battleData.userVote}
                 onVote={handleVote}
                 battleName={battleData.name}
+                theme={battleData.theme}
             />
         </div>
     );

@@ -23,9 +23,11 @@ function HomePage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Initial Fetch
+        // Initial Fetch Sequence
         const init = async () => {
-            await Promise.all([fetchTrending(), fetchRecent(1)]);
+            const trending = await fetchTrending();
+            const excludeIds = trending ? trending.map(b => b.battleId) : [];
+            await fetchRecent(1, excludeIds);
             setLoading(false);
         };
         init();
@@ -35,16 +37,22 @@ function HomePage() {
         try {
             const res = await axios.get(`${API_URL}/battles/trending`);
             setTrendingBattles(res.data);
+            return res.data; // Return for chaining
         } catch (error) {
             console.error("Error fetching trending:", error);
+            return [];
         }
     };
 
-    const fetchRecent = async (pageNum) => {
+    const fetchRecent = async (pageNum, specificExcludeIds = null) => {
         try {
             const limit = 10;
+            // Use specific IDs if passed (initial load), otherwise state (load more)
+            const idsToExclude = specificExcludeIds || trendingBattles.map(b => b.battleId);
+            const excludeIdsStr = idsToExclude.join(',');
+
             const res = await axios.get(`${API_URL}/battles`, {
-                params: { page: pageNum, limit }
+                params: { page: pageNum, limit, excludeIds: excludeIdsStr }
             });
             const newBattles = res.data;
 
@@ -93,36 +101,47 @@ function HomePage() {
         );
     }
 
-    const BattleCard = ({ battle, trending = false }) => (
-        <Link
-            to={`/battle/${battle.battleId}`}
-            className={`block bg-gray-900/30 hover:bg-gray-800 border ${trending ? 'border-yellow-500/50 shadow-yellow-500/20 shadow-sm' : 'border-gray-800'} hover:border-gray-700 rounded-xl p-4 transition-all hover:scale-[1.01] group mb-3 relative overflow-hidden`}
-        >
-            {trending && (
-                <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
-                    HOT 🔥
-                </div>
-            )}
-            <div className="flex justify-between items-center mb-2 min-w-0">
-                <h3 className="font-bold text-lg text-gray-200 group-hover:text-white transition-colors line-clamp-2 pr-8 min-w-0">
-                    {battle.name}
-                </h3>
-                <span className="text-xs font-mono bg-gray-800 px-2 py-1 rounded text-gray-400 whitespace-nowrap ml-2 flex-shrink-0">
-                    {battle.totalVotes} votes
-                </span>
-            </div>
-            <div className="flex gap-2 min-w-0">
-                {battle.options.map((opt, i) => (
-                    <span
-                        key={opt.id}
-                        className={`text-xs px-2 py-1 rounded bg-opacity-20 ${i === 0 ? 'bg-red-500 text-red-200' : 'bg-blue-500 text-blue-200'} truncate flex-1 text-center`}
-                    >
-                        {opt.name}
+    const BattleCard = ({ battle, trending = false }) => {
+        // Theme fallback or use provided
+        const theme = battle.theme || {
+            optionAColor: '#ef4444',
+            optionBColor: '#3b82f6',
+            background: 'linear-gradient(to right, #1f2937, #111827)'
+        };
+
+        return (
+            <Link
+                to={`/battle/${battle.battleId}`}
+                className={`block bg-gray-900/30 hover:bg-gray-800 border ${trending ? 'border-yellow-500/50 shadow-yellow-500/20 shadow-sm' : 'border-gray-800'} hover:border-gray-700 rounded-xl p-4 transition-all hover:scale-[1.01] group mb-3 relative overflow-hidden`}
+                style={{ background: `linear-gradient(to bottom right, ${theme.background.split(',')[1] || '#1f2937'}20, ${theme.background.split(',')[2] || '#111827'}20)` }}
+            >
+                {trending && (
+                    <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
+                        HOT 🔥
+                    </div>
+                )}
+                <div className="flex justify-between items-center mb-2 min-w-0">
+                    <h3 className="font-bold text-lg text-gray-200 group-hover:text-white transition-colors line-clamp-2 pr-8 min-w-0">
+                        {battle.name}
+                    </h3>
+                    <span className="text-xs font-mono bg-gray-800 px-2 py-1 rounded text-gray-400 whitespace-nowrap ml-2 flex-shrink-0">
+                        {battle.totalVotes} votes
                     </span>
-                ))}
-            </div>
-        </Link>
-    );
+                </div>
+                <div className="flex gap-2 min-w-0">
+                    {battle.options.map((opt, i) => (
+                        <span
+                            key={opt.id}
+                            className={`text-xs px-2 py-1 rounded bg-opacity-80 text-white font-bold shadow-sm truncate flex-1 text-center`}
+                            style={{ backgroundColor: i === 0 ? theme.optionAColor : theme.optionBColor }}
+                        >
+                            {opt.name}
+                        </span>
+                    ))}
+                </div>
+            </Link>
+        );
+    };
 
     return (
         <div className="min-h-screen bg-black text-white p-4 md:p-8">
@@ -144,7 +163,6 @@ function HomePage() {
                 <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
 
                     {/* Create Battle Section */}
-                    {/* Fixed Logic: Sticky creates issues on mobile if overflow is hidden elsewhere. Removed sticky for mobile simplicity. */}
                     <div className={`${showForm ? 'block' : 'hidden'} md:block`}>
                         <div className="bg-gray-900/50 p-6 md:p-8 rounded-2xl border border-gray-800 backdrop-blur-sm md:sticky md:top-8">
                             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
@@ -214,10 +232,10 @@ function HomePage() {
                             </div>
                         )}
 
-                        {/* Recent Battles */}
+                        {/* Top Voted Battles */}
                         <div>
                             <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-400">
-                                <span className="text-xl">🆕</span> Recent Battles
+                                <span className="text-xl">🏆</span> Top Voted Battles
                             </h2>
                             <div className="space-y-1">
                                 {recentBattles.length === 0 && trendingBattles.length === 0 ? (
