@@ -156,7 +156,7 @@ function HomePage() {
                         onClick={() => setShowForm(!showForm)}
                         className="w-full bg-gray-800 border border-gray-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
                     >
-                        {showForm ? '❌ Cancel' : '➕ Create New Battle'}
+                        {showForm ? '❌ Cancelar' : '➕ Crear Nueva Batalla'}
                     </button>
                 </div>
 
@@ -166,39 +166,39 @@ function HomePage() {
                     <div className={`${showForm ? 'block' : 'hidden'} md:block`}>
                         <div className="bg-gray-900/50 p-6 md:p-8 rounded-2xl border border-gray-800 backdrop-blur-sm md:sticky md:top-8">
                             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                                <span className="text-xl">⚔️</span> Create Battle
+                                <span className="text-xl">⚔️</span> Crear Batalla
                             </h2>
                             <form onSubmit={handleCreateBattle} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Battle Name</label>
+                                    <label className="block text-sm text-gray-400 mb-1">Nombre de la Batalla</label>
                                     <input
                                         type="text"
                                         value={newBattleName}
                                         onChange={(e) => setNewBattleName(e.target.value)}
-                                        placeholder="e.g. Cats vs Dogs"
+                                        placeholder="ej. Gatos vs Perros"
                                         className="w-full bg-gray-800 border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-purple-500 outline-none"
                                         required
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm text-gray-400 mb-1">Option 1 (Red)</label>
+                                        <label className="block text-sm text-gray-400 mb-1">Opción 1 (Rojo)</label>
                                         <input
                                             type="text"
                                             value={option1}
                                             onChange={(e) => setOption1(e.target.value)}
-                                            placeholder="Cats"
+                                            placeholder="Gatos"
                                             className="w-full bg-gray-800 border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-red-500 outline-none"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm text-gray-400 mb-1">Option 2 (Blue)</label>
+                                        <label className="block text-sm text-gray-400 mb-1">Opción 2 (Azul)</label>
                                         <input
                                             type="text"
                                             value={option2}
                                             onChange={(e) => setOption2(e.target.value)}
-                                            placeholder="Dogs"
+                                            placeholder="Perros"
                                             className="w-full bg-gray-800 border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
                                             required
                                         />
@@ -209,7 +209,7 @@ function HomePage() {
                                     disabled={creating}
                                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {creating ? 'Creating...' : 'Start Battle! 🚀'}
+                                    {creating ? 'Creando...' : '¡Empezar Batalla! 🚀'}
                                 </button>
                             </form>
                         </div>
@@ -222,7 +222,7 @@ function HomePage() {
                         {trendingBattles.length > 0 && (
                             <div className="mb-8">
                                 <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-yellow-500">
-                                    <span className="text-2xl">📈</span> Trending Top 5
+                                    <span className="text-2xl">📈</span> Top 5 Tendencias
                                 </h2>
                                 <div className="space-y-1">
                                     {trendingBattles.map((battle) => (
@@ -235,12 +235,12 @@ function HomePage() {
                         {/* Top Voted Battles */}
                         <div>
                             <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-400">
-                                <span className="text-xl">🏆</span> Top Voted Battles
+                                <span className="text-xl">🏆</span> Más Votadas
                             </h2>
                             <div className="space-y-1">
                                 {recentBattles.length === 0 && trendingBattles.length === 0 ? (
                                     <p className="text-gray-500 text-center py-8 bg-gray-900/30 rounded-xl">
-                                        No active battles yet. Be the first!
+                                        No hay batallas activas. ¡Sé el primero!
                                     </p>
                                 ) : (
                                     recentBattles.map((battle) => (
@@ -256,7 +256,7 @@ function HomePage() {
                                     disabled={loadingMore}
                                     className="w-full mt-6 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold py-3 rounded-xl transition-colors border border-gray-700 disabled:opacity-50"
                                 >
-                                    {loadingMore ? 'Loading...' : 'Load More'}
+                                    {loadingMore ? 'Cargando...' : 'Cargar Más'}
                                 </button>
                             )}
                         </div>

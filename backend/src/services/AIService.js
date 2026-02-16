@@ -31,8 +31,6 @@ class AIService {
             const response = await result.response;
             const text = response.text();
 
-            // Clean up markdown code blocks if present
-            const jsonStr = text.replace(/```json|```/g, "").trim();
             return JSON.parse(jsonStr);
         } catch (error) {
             console.error(`AIService Error (Attempt ${attempt}):`, error.message);
@@ -42,6 +40,38 @@ class AIService {
                 return this.generateBattleTheme(battleName, options, attempt + 1);
             }
             return this.getDefaultTheme();
+        }
+    }
+
+    async generateMemeContext(battleName, options = []) {
+        const genAI = this.getGenAI();
+        if (!genAI) return null;
+
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+            // Templates defined in backend (hardcoded reference for prompt)
+            const templates = ["drake", "distracted", "two_buttons"];
+            const optionsText = options.length > 0 ? `Options: ${options.map(o => o.name).join(", ")}` : "";
+
+            const prompt = `Genera un contexto gracioso para un meme sobre una batalla llamada "${battleName}" ${optionsText}. 
+            Elige UNA plantilla de: ${templates.join(", ")}.
+            
+            - para 'drake': text0 es lo que rechaza (la peor opción), text1 es lo que le gusta (la mejor opción).
+            - para 'distracted': text0 es el 'novio distraído' (usuario/votante), text1 es la 'chica distraída' (la opción tentadora), text2 es la 'novia' (la opción aburrida).
+            - para 'two_buttons': text0 es botón 1, text1 es botón 2 (decisión difícil).
+
+            El texto debe ser en ESPAÑOL, corto y gracioso.
+            Return ONLY JSON: { "templateId": "string", "texts": ["string", "string", ...] }`;
+
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+
+            const jsonStr = text.replace(/```json|```/g, "").trim();
+            return JSON.parse(jsonStr);
+        } catch (error) {
+            console.error("AIService Meme Error:", error.message);
+            return null;
         }
     }
 

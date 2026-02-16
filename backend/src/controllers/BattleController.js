@@ -199,6 +199,36 @@ class BattleController {
             res.status(500).json({ error: 'Server Error' });
         }
     }
+
+    async getMeme(req, res) {
+        try {
+            const { battleId } = req.params;
+            const battle = await BattleService.getBattleById(battleId);
+            if (!battle) return res.status(404).json({ error: 'Battle not found' });
+
+            // 1. Generate Context (Text + Template Selection) via AI
+            // In a real app, we might want to cache this in the DB so we don't regenerate every time
+            const memeContext = await require('../services/AIService').generateMemeContext(battle.name, battle.options);
+
+            if (!memeContext) {
+                return res.status(500).json({ error: 'Failed to generate meme context' });
+            }
+
+            // 2. Generate Image via MemeService
+            const imageBuffer = await require('../services/MemeService').generateMeme(memeContext.templateId, memeContext.texts);
+
+            // 3. Return Image
+            res.writeHead(200, {
+                'Content-Type': 'image/jpeg',
+                'Content-Length': imageBuffer.length
+            });
+            res.end(imageBuffer);
+
+        } catch (err) {
+            console.error("Meme Generation Error:", err);
+            res.status(500).json({ error: 'Server Error generating meme' });
+        }
+    }
 }
 
 module.exports = new BattleController();

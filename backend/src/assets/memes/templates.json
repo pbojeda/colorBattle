@@ -1,0 +1,97 @@
+[
+    {
+        "id": "drake",
+        "filename": "drake.jpg",
+        "name": "Drake Hotline Bling",
+        "width": 1200,
+        "height": 1200,
+        "boxes": [
+            {
+                "x": 600,
+                "y": 0,
+                "w": 600,
+                "h": 600,
+                "style": "dislike",
+                "color": "#000000",
+                "fontSize": 48
+            },
+            {
+                "x": 600,
+                "y": 600,
+                "w": 600,
+                "h": 600,
+                "style": "like",
+                "color": "#000000",
+                "fontSize": 48
+            }
+        ]
+    },
+    {
+        "id": "distracted",
+        "filename": "distracted.jpg",
+        "name": "Distracted Boyfriend",
+        "width": 1200,
+        "height": 800,
+        "boxes": [
+            {
+                "x": 150,
+                "y": 500,
+                "w": 350,
+                "h": 200,
+                "style": "ignored",
+                "color": "#ffffff",
+                "stroke": "#000000",
+                "fontSize": 40
+            },
+            {
+                "x": 600,
+                "y": 450,
+                "w": 300,
+                "h": 200,
+                "style": "distracted",
+                "color": "#ffffff",
+                "stroke": "#000000",
+                "fontSize": 40
+            },
+            {
+                "x": 900,
+                "y": 350,
+                "w": 250,
+                "h": 200,
+                "style": "object",
+                "color": "#ffffff",
+                "stroke": "#000000",
+                "fontSize": 40
+            }
+        ]
+    },
+    {
+        "id": "two_buttons",
+        "filename": "two_buttons.jpg",
+        "name": "Two Buttons",
+        "width": 600,
+        "height": 908,
+        "boxes": [
+            {
+                "x": 50,
+                "y": 80,
+                "w": 230,
+                "h": 120,
+                "style": "button1",
+                "color": "#000000",
+                "fontSize": 24,
+                "rotation": -10
+            },
+            {
+                "x": 300,
+                "y": 80,
+                "w": 230,
+                "h": 120,
+                "style": "button2",
+                "color": "#000000",
+                "fontSize": 24,
+                "rotation": -10
+            }
+        ]
+    }
+]

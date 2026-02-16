@@ -5,13 +5,14 @@ import useSound from 'use-sound';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { ShareButton } from './ShareButton';
+import { MemeButton } from './MemeButton';
 import API_URL from '../api/config';
 
 // Sounds
 import popSound from '../assets/sounds/pop.wav';
 import cheerSound from '../assets/sounds/cheer.mp3';
 
-export function BattleArena({ options, onVote, userVote, totalVotes, battleName, theme }) {
+export function BattleArena({ options, onVote, userVote, totalVotes, battleName, theme, onGenerateMeme }) {
     // Default theme fallback
     const safeTheme = theme || {
         optionAColor: '#ef4444',
@@ -102,6 +103,7 @@ export function BattleArena({ options, onVote, userVote, totalVotes, battleName,
             style={{ background: safeTheme.background }}
         >
             <ShareButton options={options} />
+            <MemeButton onClick={onGenerateMeme} />
 
             <h1 className="absolute top-4 md:top-8 left-0 right-0 text-center text-2xl md:text-4xl font-bold z-20 drop-shadow-lg uppercase tracking-widest pointer-events-none mix-blend-overlay">
                 {battleName || "Batalla de Colores"}

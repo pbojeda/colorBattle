@@ -17,6 +17,7 @@
     "@sentry/node": "^10.38.0",
     "@sentry/profiling-node": "^10.38.0",
     "body-parser": "^2.2.2",
+    "canvas": "^3.2.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",

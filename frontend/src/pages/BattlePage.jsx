@@ -97,6 +97,34 @@ function BattlePage() {
         }
     };
 
+    // 4. Handle Meme Generation
+    const [showMemeModal, setShowMemeModal] = useState(false);
+    const [memeUrl, setMemeUrl] = useState(null);
+    const [generatingMeme, setGeneratingMeme] = useState(false);
+
+    const handleGenerateMeme = async () => {
+        if (memeUrl) {
+            setShowMemeModal(true);
+            return;
+        }
+
+        setGeneratingMeme(true);
+        setShowMemeModal(true); // Show modal immediately with loading state
+
+        try {
+            // Request Blob to handle image data
+            const res = await axios.get(`${API_URL}/battle/${battleId}/meme`, { responseType: 'blob' });
+            const url = URL.createObjectURL(res.data);
+            setMemeUrl(url);
+        } catch (error) {
+            console.error("Error generating meme:", error);
+            alert("Failed to generate meme. AI might be busy!");
+            setShowMemeModal(false);
+        } finally {
+            setGeneratingMeme(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen bg-black text-white">
@@ -120,9 +148,10 @@ function BattlePage() {
         <div className="relative h-screen w-screen overflow-hidden">
             <div className="absolute top-4 left-4 z-50">
                 <Link to="/" className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                    ← Back
+                    ← Volver
                 </Link>
             </div>
+
             <BattleArena
                 options={battleData.options}
                 totalVotes={battleData.totalVotes}
@@ -130,7 +159,57 @@ function BattlePage() {
                 onVote={handleVote}
                 battleName={battleData.name}
                 theme={battleData.theme}
+                onGenerateMeme={handleGenerateMeme}
             />
+
+            {/* Meme Modal */}
+            {showMemeModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setShowMemeModal(false)}>
+                    <div className="bg-gray-900 border border-gray-700 rounded-2xl p-4 max-w-lg w-full relative" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setShowMemeModal(false)}
+                            className="absolute top-2 right-2 text-gray-400 hover:text-white bg-gray-800 rounded-full p-2"
+                        >
+                            ✕
+                        </button>
+
+                        <h3 className="text-xl font-bold text-white mb-4 text-center">Generador de Memes IA 🤖</h3>
+
+                        <div className="flex flex-col items-center justify-center min-h-[300px]">
+                            {generatingMeme ? (
+                                <div className="text-center">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                                    <p className="text-gray-300 animate-pulse">Cocinando un meme picante...</p>
+                                    <p className="text-xs text-gray-500 mt-2">(Llamando a la IA para que cuente chistes)</p>
+                                </div>
+                            ) : memeUrl ? (
+                                <div className="flex flex-col gap-4 w-full">
+                                    <img src={memeUrl} alt="Meme Generado por IA" className="w-full rounded-lg shadow-lg border border-gray-700" />
+                                    <div className="flex gap-2 justify-center">
+                                        <a
+                                            href={memeUrl}
+                                            download={`meme-${battleId}.jpg`}
+                                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold flex-1 text-center"
+                                        >
+                                            💾 Descargar
+                                        </a>
+                                        {navigator.share && (
+                                            <button
+                                                onClick={() => navigator.share({ title: 'Meme IA', text: '¡Mira esto!', url: window.location.href, files: [new File([memeUrl], 'meme.jpg', { type: 'image/jpeg' })] }).catch(() => { })}
+                                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex-1"
+                                            >
+                                                🚀 Compartir
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-red-400">Something went wrong.</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
