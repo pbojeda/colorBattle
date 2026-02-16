@@ -11,7 +11,14 @@ RUN apk add --no-cache \
     pango-dev \
     giflib-dev \
     python3 \
-    make
+    make \
+    fontconfig \
+    ttf-dejavu \
+    ttf-liberation \
+    font-noto
+
+# Refresh font cache
+RUN fc-cache -f
 
 COPY package*.json ./
 RUN npm install
