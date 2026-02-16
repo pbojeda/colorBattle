@@ -72,13 +72,12 @@ export function BattleArena({ options, onVote, userVote, totalVotes, battleName,
         }
     }, [leftPercent, rightPercent, introFinished, leftFlex, rightFlex]);
 
-    // Effect: Confetti & Sound on New Vote
+    // Effect: Confetti & Sound & Push on New Vote
     useEffect(() => {
         // If user just voted (state changed from null/other to something)
         if (userVote && userVote !== prevUserVote.current) {
             playCheer();
 
-            // Determine winner color for confetti
             // Determine winner color for confetti
             const color = userVote === left.id ? safeTheme.optionAColor : safeTheme.optionBColor;
 
@@ -88,9 +87,33 @@ export function BattleArena({ options, onVote, userVote, totalVotes, battleName,
                 origin: { y: 0.6 },
                 colors: [color, '#ffffff']
             });
+
+            // Trigger Push Animation on Vote
+            const pushTransition = { duration: 0.4, ease: "backOut" };
+            const settleTransition = { type: "spring", stiffness: 100, damping: 12, mass: 0.8 };
+
+            const triggerPush = async () => {
+                if (userVote === left.id) {
+                    // Left pushes aggressive
+                    animate(leftFlex, Math.min(leftPercent + 20, 90), pushTransition);
+                    animate(rightFlex, Math.max(rightPercent - 20, 10), pushTransition);
+                } else {
+                    // Right pushes aggressive
+                    animate(leftFlex, Math.max(leftPercent - 20, 10), pushTransition);
+                    animate(rightFlex, Math.min(rightPercent + 20, 90), pushTransition);
+                }
+
+                await new Promise(r => setTimeout(r, 400));
+
+                // Return to actual percentage
+                animate(leftFlex, leftPercent, settleTransition);
+                animate(rightFlex, rightPercent, settleTransition);
+            };
+
+            triggerPush();
         }
         prevUserVote.current = userVote;
-    }, [userVote, left.id, playCheer]);
+    }, [userVote, left.id, right.id, leftPercent, rightPercent, leftFlex, rightFlex, playCheer, safeTheme]);
 
     const handleVote = (id) => {
         playPop();

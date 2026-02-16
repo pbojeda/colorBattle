@@ -65,7 +65,10 @@ initializeBattle();
 
 // API Routes
 const battleRoutes = require('./src/routes/battleRoutes');
+const socialRoutes = require('./src/routes/socialRoutes');
+
 app.use('/api', battleRoutes);
+app.use('/api', socialRoutes);
 
 // Store io in app for controller access
 app.set('io', io);

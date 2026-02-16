@@ -1,24 +1,23 @@
-# ColorBattle (MVP v3)
+# ColorBattle (MVP v5)
 
 Welcome to **ColorBattle**, a real-time viral voting platform where users create and join epic binary battles (e.g., "Pizza con Piña vs Pizza sin Piña").
 
-![Status](https://img.shields.io/badge/Status-Live-success)
+![Status](https://img.shields.io/badge/Status-v5--Live-blueviolet)
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-blue)
 ![Backend](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-green)
-![Database](https://img.shields.io/badge/Datebase-MongoDB-forest)
+![Database](https://img.shields.io/badge/Database-MongoDB-forest)
 
-## 🎨 Features (MVP v4)
-- **Multiple Battles**: Custom battles with unique names.
-- **Dynamic Themes (AI)**: Themes adapt to the battle topic automatically (e.g., "Fire vs Ice" gets Red/Blue gradients).
-- **AI Memes**: Generate funny memes for any battle with one click (Spanish localized).
-- **Real-time Voting**: Socket.io updates.
-- **Viral Mechanics**: Web Share API & Meme sharing.
-- **Optimized UX**: Smart sorting, trending logic, and animations.
+## 🎨 Features (MVP v5)
+- **Real-time Social**: Live chat with team-colored messages and funny auto-nicknames.
+- **Reaction Rain**: Send floating emojis to the field that everyone sees instantly.
+- **Push Animations**: Feel the impact of your vote with aggressive "push" physics.
+- **AI-Powered Themes**: Themes adapt to the battle topic automatically via Google Gemini.
+- **AI Memes**: Generate context-aware memes (Spanish) with one click.
+- **Real-time Engine**: Powered by Socket.io for sub-second updates.
 
 ## 🛠️ Tech Stack
 - **Frontend**: React, Vite, TailwindCSS, Framer Motion.
 - **Backend**: Node.js, Express, MongoDB, Socket.io, **Canvas** (Image Gen), **Google Gemini** (AI).
-- **Infrastructure**: Vercel & Render.
 
 ## 📦 Getting Started
 See [Backend README](backend/README.md) and [Frontend README](frontend/README.md) for specific instructions.
@@ -33,14 +32,10 @@ See [Backend README](backend/README.md) and [Frontend README](frontend/README.md
 
 ## 🔮 Roadmap
 
-### v5: Social Interactions 💬
--   **Real-time Chat**: Comments section per battle.
--   **Real-time Chat**: Comments section per battle powered by Socket.io.
--   **Reactions**: Emotes/reactions beyond simple voting.
-
-### v6: User Accounts 👤
--   **Profiles**: Track voting history.
--   **Leaderboards**: Top battle creators.
+### v6: User Accounts & Moderation 👤
+-   **Profiles**: Track voting history and leaderboard position.
+-   **Advanced AI Moderation**: Automatic filtering of offensive messages.
+-   **Battle Endings**: Celebratory animations for time-limited battles.
 
 ---
 *Maintained by the Agentic Team*

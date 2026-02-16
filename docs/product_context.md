@@ -31,15 +31,22 @@
 5.  Stats are revealed ( percentages, total votes).
 6.  Prompt to share: "Your side needs you! Share to get more reinforcements."
 
-## Technical Architecture (MVP)
--   **Backend**: Node.js + Express.
--   **Data Storage**: JSON files (simple, fast for MVP, easy to migrate to DB later).
--   **Frontend**: *To Be Decided* (Needs to be performant, support animations).
--   **Deployment**: To be determined (Vercel/Netlify/Heroku/Railway).
+## Technical Architecture (Current)
+-   **Backend**: Node.js + Express + Socket.io.
+-   **Data Storage**: MongoDB (Atlas) for persistence of battles, votes, comments, and reactions.
+-   **AI**: Google Gemini integration for dynamic themes and meme captioning.
+-   **Frontend**: React + Vite + Framer Motion.
+-   **Device Identification**: FingerprintJS (visitorId) for voting and chat identity.
 
-## Future Roadmap (Post-MVP)
--   Multiple concurrent battles.
--   User-generated battles.
--   Persistent accounts.
--   Leaderboards.
--   PostgreSQL database.
+## Current Phase: MVP v5 (Social & Real-time)
+- **Multiple Battles**: Fully operational.
+- **AI Themes**: Operational.
+- **AI Memes**: Operational.
+- **Real-time Engine**: Socket.io handles voting updates, chat, and reactions.
+- **Social**: Live chat and floating reactions are active.
+
+## Future Roadmap (Next)
+- **User Accounts**: Persistent profiles and history.
+- **Advanced Moderation**: AI-based content filtering.
+- **Leaderboards**: Global ranking of most popular battles and active users.
+- **Competitive Seasons**: Limited-time arenas with special rewards.

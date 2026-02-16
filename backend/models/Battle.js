@@ -14,6 +14,10 @@ const BattleSchema = new mongoose.Schema({
         type: Map,
         of: String // deviceId -> optionId
     },
+    emojis: {
+        type: [String],
+        default: ['🔥', '😂', '💩']
+    },
     theme: {
         optionAColor: { type: String, default: "#ef4444" },
         optionBColor: { type: String, default: "#3b82f6" },

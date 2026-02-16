@@ -3,6 +3,8 @@ import axios from 'axios';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { useParams, Link } from 'react-router-dom';
 import { BattleArena } from '../components/BattleArena';
+import Chat from '../components/Social/Chat';
+import ReactionBar from '../components/Social/ReactionBar';
 import { io } from 'socket.io-client';
 
 // Config
@@ -15,6 +17,7 @@ function BattlePage() {
     const [battleData, setBattleData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [socket, setSocket] = useState(null);
 
     // 1. Initialize FingerprintJS on mount
     useEffect(() => {
@@ -48,14 +51,15 @@ function BattlePage() {
         fetchData(); // Initial fetch
 
         // WebSocket Connection
-        const socket = io(API_URL_BASE);
+        const newSocket = io(API_URL_BASE);
+        setSocket(newSocket);
 
-        socket.on('connect', () => {
+        newSocket.on('connect', () => {
             console.log('Connected to WebSocket');
-            socket.emit('join_battle', battleId);
+            newSocket.emit('join_battle', battleId);
         });
 
-        socket.on('vote_update', (newData) => {
+        newSocket.on('vote_update', (newData) => {
             if (newData.battleId !== battleId) return;
 
             setBattleData(prev => {
@@ -74,7 +78,8 @@ function BattlePage() {
 
         return () => {
             clearInterval(interval);
-            socket.disconnect();
+            newSocket.disconnect();
+            setSocket(null);
         };
     }, [deviceId, battleId]);
 
@@ -146,6 +151,14 @@ function BattlePage() {
 
     return (
         <div className="relative h-screen w-screen overflow-hidden">
+            {/* Social Components */}
+            {socket && deviceId && (
+                <>
+                    <Chat battleId={battleId} fingerprint={deviceId} socket={socket} battleData={battleData} />
+                    <ReactionBar battleId={battleId} fingerprint={deviceId} socket={socket} />
+                </>
+            )}
+
             <div className="absolute top-4 left-4 z-50">
                 <Link to="/" className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
                     ← Volver
