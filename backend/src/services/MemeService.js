@@ -41,7 +41,7 @@ class MemeService {
         if (rotation) ctx.rotate((rotation * Math.PI) / 180);
         ctx.translate(-cx, -cy);
 
-        ctx.font = `bold ${fontSize}px sans-serif`; // Simple sans-serif, could load Impact later
+        ctx.font = `bold ${fontSize}px "DejaVu Sans", "Arial", sans-serif`; // Use DejaVu Sans which is in Docker
         ctx.fillStyle = color;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
