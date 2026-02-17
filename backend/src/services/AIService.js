@@ -1,10 +1,10 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
+const OpenAI = require("openai");
 
 class AIService {
     constructor() {
         this.genAI = null;
+        this.openai = null;
     }
 
     getGenAI() {
@@ -14,75 +14,156 @@ class AIService {
         return this.genAI;
     }
 
-    async generateBattleTheme(battleName, options = [], attempt = 1) {
-        const genAI = this.getGenAI();
-
-        if (!genAI) {
-            console.log("AIService: No API Key, using fallback.");
-            return this.getDefaultTheme();
+    getOpenAI() {
+        if (!this.openai && process.env.OPENAI_API_KEY) {
+            this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         }
+        return this.openai;
+    }
 
+    async generateBattleTheme(battleName, options = []) {
+        // Try Gemini First
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
-            const optionsText = options.length > 0 ? `Options: ${options.map(o => o.name).join(", ")}` : "";
-            const prompt = `Generate a color theme for a battle named "${battleName}" ${optionsText}. Return ONLY a JSON object with this structure: { "optionAColor": "#hex", "optionBColor": "#hex", "background": "valid css background value for a linear gradient" }. Ensure high contrast and vibrant colors suitable for a dark mode UI.`;
-
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
-
-            return JSON.parse(jsonStr);
+            const theme = await this.generateThemeGemini(battleName, options);
+            if (theme) return theme;
         } catch (error) {
-            console.error(`AIService Error (Attempt ${attempt}):`, error.message);
-            if (attempt < 2) {
-                console.log("Retrying in 1 second...");
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                return this.generateBattleTheme(battleName, options, attempt + 1);
-            }
-            return this.getDefaultTheme();
+            console.error("Gemini Theme Error:", error.message);
         }
+
+        // Try OpenAI Second
+        try {
+            const theme = await this.generateThemeOpenAI(battleName, options);
+            if (theme) return theme;
+        } catch (error) {
+            console.error("OpenAI Theme Error:", error.message);
+        }
+
+        // Fallback
+        console.log("AIService: Using Default Theme Fallback.");
+        return this.getDefaultTheme();
     }
 
     async generateMemeContext(battleName, options = []) {
-        const genAI = this.getGenAI();
-        if (!genAI) return null;
-
+        // Try Gemini First
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
-            // Templates defined in backend (hardcoded reference for prompt)
-            const templates = ["drake", "distracted", "two_buttons"];
-            const optionsText = options.length > 0 ? `Options: ${options.map(o => o.name).join(", ")}` : "";
+            const context = await this.generateMemeGemini(battleName, options);
+            if (context) return context;
+        } catch (error) {
+            console.error("Gemini Meme Error:", error.message);
+        }
 
-            const prompt = `Genera un contexto gracioso para un meme sobre una batalla llamada "${battleName}" ${optionsText}. 
+        // Try OpenAI Second
+        try {
+            const context = await this.generateMemeOpenAI(battleName, options);
+            if (context) return context;
+        } catch (error) {
+            console.error("OpenAI Meme Error:", error.message);
+        }
+
+        // Fallback
+        console.log("AIService: Using Default Meme Fallback.");
+        return this.getFallbackMemeContext(battleName, options);
+    }
+
+    // --- GEMINI IMPLEMENTATIONS ---
+
+    async generateThemeGemini(battleName, options) {
+        const genAI = this.getGenAI();
+        if (!genAI) throw new Error("No Gemini API Key");
+
+        console.log("AIService: Generating Battle Theme (Gemini) for:", battleName);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const optionsText = options.length > 0 ? `Options: ${options.map(o => o.name).join(", ")}` : "";
+        const prompt = `Generate a color theme for a battle named "${battleName}" ${optionsText}. Return ONLY a JSON object with this structure: { "optionAColor": "#hex", "optionBColor": "#hex", "background": "valid css background value for a linear gradient" }. Ensure high contrast and vibrant colors suitable for a dark mode UI.`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        return JSON.parse(text.replace(/```json|```/g, "").trim());
+    }
+
+    async generateMemeGemini(battleName, options) {
+        const genAI = this.getGenAI();
+        if (!genAI) throw new Error("No Gemini API Key");
+
+        console.log("AIService: Generating Meme Context (Gemini) for:", battleName);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const templates = ["drake", "distracted", "two_buttons"];
+        const optionsText = options.length > 0 ? `Options: ${options.map(o => o.name).join(", ")}` : "";
+
+        const prompt = `Genera un contexto gracioso para un meme sobre una batalla llamada "${battleName}" ${optionsText}. 
             Elige UNA plantilla de: ${templates.join(", ")}.
-            
-            - para 'drake': text0 es lo que rechaza (la peor opción), text1 es lo que le gusta (la mejor opción).
-            - para 'distracted': text0 es el 'novio distraído' (usuario/votante), text1 es la 'chica distraída' (la opción tentadora), text2 es la 'novia' (la opción aburrida).
-            - para 'two_buttons': text0 es botón 1, text1 es botón 2 (decisión difícil).
-
-            El texto debe ser en ESPAÑOL, corto y gracioso.
+            - para 'drake': text0 es lo que rechaza, text1 lo que aprueba.
+            - para 'distracted': text0 novio, text1 chica nueva, text2 novia actual.
+            - para 'two_buttons': text0 boton1, text1 boton2.
             Return ONLY JSON: { "templateId": "string", "texts": ["string", "string", ...] }`;
 
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        return JSON.parse(text.replace(/```json|```/g, "").trim());
+    }
 
-            const jsonStr = text.replace(/```json|```/g, "").trim();
-            return JSON.parse(jsonStr);
-        } catch (error) {
-            console.error("AIService Meme Error:", error.message);
-            return null;
+    // --- OPENAI IMPLEMENTATIONS ---
+
+    async generateThemeOpenAI(battleName, options) {
+        const openai = this.getOpenAI();
+        if (!openai) throw new Error("No OpenAI API Key");
+
+        console.log("AIService: Generating Battle Theme (OpenAI) for:", battleName);
+        const optionsText = options.length > 0 ? `Options: ${options.map(o => o.name).join(", ")}` : "";
+        const prompt = `Generate a color theme for a battle named "${battleName}" ${optionsText}. Return ONLY a JSON object with this structure: { "optionAColor": "#hex", "optionBColor": "#hex", "background": "valid css background value for a linear gradient" }. Ensure high contrast and vibrant colors suitable for a dark mode UI.`;
+
+        const completion = await openai.chat.completions.create({
+            messages: [{ role: "system", content: "You are a JSON generator." }, { role: "user", content: prompt }],
+            model: "gpt-3.5-turbo",
+            response_format: { type: "json_object" }
+        });
+
+        return JSON.parse(completion.choices[0].message.content);
+    }
+
+    async generateMemeOpenAI(battleName, options) {
+        const openai = this.getOpenAI();
+        if (!openai) throw new Error("No OpenAI API Key");
+
+        console.log("AIService: Generating Meme Context (OpenAI) for:", battleName);
+        const templates = ["drake", "distracted", "two_buttons"];
+        const optionsText = options.length > 0 ? `Options: ${options.map(o => o.name).join(", ")}` : "";
+
+        const prompt = `Genera un contexto gracioso para un meme sobre una batalla llamada "${battleName}" ${optionsText}. 
+            Elige UNA plantilla de: ${templates.join(", ")}.
+            - para 'drake': text0 es lo que rechaza, text1 lo que aprueba.
+            - para 'distracted': text0 novio, text1 chica nueva, text2 novia actual.
+            - para 'two_buttons': text0 boton1, text1 boton2.
+            Return ONLY JSON: { "templateId": "string", "texts": ["string", "string", ...] }`;
+
+        const completion = await openai.chat.completions.create({
+            messages: [{ role: "system", content: "You are a creative JSON generator." }, { role: "user", content: prompt }],
+            model: "gpt-3.5-turbo",
+            response_format: { type: "json_object" }
+        });
+
+        return JSON.parse(completion.choices[0].message.content);
+    }
+
+    // --- FALLBACKS ---
+
+    getFallbackMemeContext(battleName, options) {
+        const isDrake = Math.random() > 0.5;
+        const [opt1, opt2] = options;
+        if (isDrake) {
+            return { templateId: 'drake', texts: [opt1.name, opt2.name] };
+        } else {
+            return { templateId: 'two_buttons', texts: [opt1.name, opt2.name] };
         }
     }
 
     getDefaultTheme() {
         return {
-            optionAColor: "#ef4444", // Red-500
-            optionBColor: "#3b82f6", // Blue-500
-            background: "linear-gradient(to right, #1f2937, #111827)" // Matches Schema default 
-            // Actually, the prompt asks for "valid css background value".
-            // Let's stick to a safe default that matches current UI.
-            // Current UI is dark.
+            optionAColor: "#ef4444",
+            optionBColor: "#3b82f6",
+            background: "linear-gradient(to right, #1f2937, #111827)"
         };
     }
 }

@@ -86,7 +86,7 @@ const Chat = ({ battleId, fingerprint, socket, battleData }) => {
                         initial={{ opacity: 0, y: 100, scale: 0.9, filter: 'blur(10px)' }}
                         animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
                         exit={{ opacity: 0, y: 40, scale: 0.95, filter: 'blur(10px)' }}
-                        className="pointer-events-auto bg-gray-950/95 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.8)] mb-4 w-[350px] max-h-[60vh] md:max-h-[70vh] flex flex-col overflow-hidden relative"
+                        className="pointer-events-auto bg-gray-950/95 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.8)] mb-4 w-[calc(100vw-2rem)] xs:w-[350px] max-h-[50vh] sm:max-h-[70vh] flex flex-col overflow-hidden relative"
                     >
                         {/* Header */}
                         <div className="bg-white/5 p-5 border-b border-white/10 flex justify-between items-center relative z-10">
@@ -113,12 +113,12 @@ const Chat = ({ battleId, fingerprint, socket, battleData }) => {
                         >
                             <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
                             <AnimatePresence mode="popLayout">
-                                {messages.map((msg) => (
+                                {messages.map((msg, index) => (
                                     <motion.div
                                         layout
                                         initial={{ opacity: 0, scale: 0.8, y: 20 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        key={msg._id || Math.random()}
+                                        key={msg._id || index}
                                         className={`flex flex-col ${msg.fingerprint === fingerprint ? 'items-end' : 'items-start'}`}
                                     >
                                         <div className={`flex items-center gap-2 mb-1 px-1 ${msg.fingerprint === fingerprint ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -159,7 +159,7 @@ const Chat = ({ battleId, fingerprint, socket, battleData }) => {
                                             placeholder="Tu Apodo..."
                                             value={nickname}
                                             onChange={(e) => setNickname(e.target.value)}
-                                            className="w-full bg-white/5 text-white text-[11px] p-3 rounded-xl border border-white/10 focus:border-blue-500/50 focus:outline-none transition-all placeholder:text-white/20"
+                                            className="w-full bg-white/5 text-white text-base md:text-[11px] p-3 rounded-xl border border-white/10 focus:border-blue-500/50 focus:outline-none transition-all placeholder:text-white/20"
                                         />
                                     </div>
                                 ) : (
@@ -181,7 +181,7 @@ const Chat = ({ battleId, fingerprint, socket, battleData }) => {
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         placeholder="Escribí algo..."
-                                        className="flex-1 bg-white/5 text-white text-xs p-3 rounded-xl border border-white/10 focus:border-blue-500/50 focus:outline-none transition-all placeholder:text-white/20"
+                                        className="flex-1 bg-white/5 text-white text-base md:text-xs p-3 rounded-xl border border-white/10 focus:border-blue-500/50 focus:outline-none transition-all placeholder:text-white/20"
                                     />
                                     <button
                                         type="submit"

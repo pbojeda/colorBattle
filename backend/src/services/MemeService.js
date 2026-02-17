@@ -27,10 +27,10 @@ class MemeService {
     }
 
     /**
-     * Draw text nicely fitted within a box
+     * Draw text nicely fitted within a box with dynamic scaling
      */
     drawText(ctx, text, box) {
-        const { x, y, w, h, color = 'black', stroke = null, rotation = 0, fontSize = 42 } = box;
+        let { x, y, w, h, color = 'black', stroke = null, rotation = 0, fontSize = 42 } = box;
 
         ctx.save();
 
@@ -41,38 +41,59 @@ class MemeService {
         if (rotation) ctx.rotate((rotation * Math.PI) / 180);
         ctx.translate(-cx, -cy);
 
-        ctx.font = `bold ${fontSize}px "DejaVu Sans", "Arial", sans-serif`; // Use DejaVu Sans which is in Docker
+        let lines = [];
+        let currentFontSize = fontSize;
+        const minFontSize = 12;
+
+        // Dynamic scaling loop
+        while (currentFontSize >= minFontSize) {
+            ctx.font = `bold ${currentFontSize}px "DejaVu Sans", "Arial", sans-serif`;
+            const words = text.split(' ');
+            lines = [];
+            let currentLine = words[0];
+            let overflow = false;
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                const metrics = ctx.measureText(currentLine + " " + word);
+                if (metrics.width > w - 20) {
+                    // Check if a single word is wider than the box
+                    if (ctx.measureText(word).width > w - 20) {
+                        overflow = true;
+                        break;
+                    }
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += " " + word;
+                }
+            }
+            lines.push(currentLine);
+
+            const lineHeight = currentFontSize * 1.2;
+            const totalHeight = lines.length * lineHeight;
+
+            if (!overflow && totalHeight <= h - 10) {
+                // Fits!
+                break;
+            }
+
+            // Doesn't fit, scale down
+            currentFontSize -= 2;
+        }
+
         ctx.fillStyle = color;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
         if (stroke) {
             ctx.strokeStyle = stroke;
-            ctx.lineWidth = 4;
+            ctx.lineWidth = Math.max(1, currentFontSize / 10);
         }
 
-        // Simple word wrap
-        const words = text.split(' ');
-        let lines = [];
-        let currentLine = words[0];
-
-        for (let i = 1; i < words.length; i++) {
-            const word = words[i];
-            const width = ctx.measureText(currentLine + " " + word).width;
-            if (width < w - 20) {
-                currentLine += " " + word;
-            } else {
-                lines.push(currentLine);
-                currentLine = word;
-            }
-        }
-        lines.push(currentLine);
-
-        // Adjust font size if too many lines? (Simplified for MVP: fixed size)
-
-        const lineHeight = fontSize * 1.2;
+        const lineHeight = currentFontSize * 1.2;
         const totalHeight = lines.length * lineHeight;
-        const startY = y + (h - totalHeight) / 2 + lineHeight / 2; // Center vertically
+        const startY = y + (h - totalHeight) / 2 + lineHeight / 2;
 
         lines.forEach((line, i) => {
             const lineY = startY + (i * lineHeight);

@@ -37,9 +37,11 @@ const io = new Server(server, {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.error('MongoDB Connection Error:', err));
+if (process.env.NODE_ENV !== 'test') {
+    mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colorBattle')
+        .then(() => console.log('MongoDB Connected'))
+        .catch(err => console.error('MongoDB Connection Error:', err));
+}
 
 // Initialize DB if not exists
 const initializeBattle = async () => {
@@ -48,6 +50,7 @@ const initializeBattle = async () => {
         if (count === 0) {
             const initialData = new Battle({
                 battleId: 'red-vs-blue',
+                name: 'Equipo Rojo vs Equipo Azul',
                 options: [
                     { id: 'red', name: 'Equipo Rojo', votes: 0 },
                     { id: 'blue', name: 'Equipo Azul', votes: 0 }
@@ -61,7 +64,9 @@ const initializeBattle = async () => {
         console.error('Initialization Error:', err);
     }
 };
-initializeBattle();
+if (process.env.NODE_ENV !== 'test') {
+    initializeBattle();
+}
 
 // API Routes
 const battleRoutes = require('./src/routes/battleRoutes');
@@ -88,6 +93,10 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    server.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = { app, server };

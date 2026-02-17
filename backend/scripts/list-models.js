@@ -1,43 +1,29 @@
 require('dotenv').config();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 async function listModels() {
-    try {
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Dummy init to get access to global methods if needed, actually just need genAI instance?
-        // Wait, the SDK doesn't have a direct "listModels" on the instance easily exposed in all versions.
-        // Let's try to just use valid known models or check if there is a list method.
-        // Actually, let's just try "gemini-pro" again but maybe the user's key is for a different region?
-        // No, let's try a simple curl to listing if SDK is obscure.
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    // There isn't a direct listModels method on the client instance in some versions,
+    // but let's try to infer or use the model manager if exposed.
+    // Actually, the error message says "Call ListModels", which is an API endpoint.
+    // The library usually has a way to do this.
+    // Let's try a direct fetch to the API endpoint if the library doesn't expose it easily,
+    // or just try 'gemini-1.0-pro' which is the specific version.
 
-        // Better: strict "gemini-1.5-flash-latest" or just "gemini-1.0-pro"
-    } catch (e) {
-        console.log(e);
-    }
-}
+    // Try a known valid model name pattern
+    const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro', 'gemini-pro'];
 
-// Alternative: Use raw fetch to list models
-async function listModelsRaw() {
-    const key = process.env.GEMINI_API_KEY;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        console.log("Available Models:");
-        if (data.models) {
-            data.models.forEach(m => {
-                if (m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')) {
-                    console.log(`- ${m.name}`);
-                }
-            });
-        } else {
-            console.log(JSON.stringify(data, null, 2));
+    for (const modelName of models) {
+        console.log(`Testing model: ${modelName}`);
+        try {
+            const model = genAI.getGenerativeModel({ model: modelName });
+            const result = await model.generateContent("Hello");
+            console.log(`SUCCESS: ${modelName} works!`);
+            return;
+        } catch (e) {
+            console.log(`FAILED: ${modelName} - ${e.message.split(':')[0]}`);
         }
-    } catch (error) {
-        console.error("Error listing models:", error);
     }
 }
 
-listModelsRaw();
+listModels();

@@ -28,6 +28,10 @@ The React frontend for ColorBattle, built with Vite and TailwindCSS.
     ```
     Server usually starts at `http://localhost:5173`.
 
+4.  **Test**:
+    - **Unit/Component**: `npm test` (Vitest)
+    - **E2E**: `npx cypress run` (Requires both servers running)
+
 ## 📦 Build
 ```bash
 npm run build

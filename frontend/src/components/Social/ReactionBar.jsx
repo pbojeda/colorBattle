@@ -6,6 +6,18 @@ const ReactionBar = ({ battleId, fingerprint, socket }) => {
     const [emojis] = useState(['🔥', '😂', '💩', '❤️', '😱', '🎉', '😡', '🤔', '👍', '👎']);
     const [animations, setAnimations] = useState([]);
 
+    const triggerAnimation = React.useCallback((emoji) => {
+        const id = Date.now() + Math.random();
+        // Spaced out X positions
+        const xPos = 10 + Math.random() * 80;
+        setAnimations(prev => [...prev, { id, emoji, x: xPos }]);
+
+        // Cleanup after animation finishes
+        setTimeout(() => {
+            setAnimations(prev => prev.filter(anim => anim.id !== id));
+        }, 3000);
+    }, []);
+
     // Listen for incoming reactions to animate
     useEffect(() => {
         const handleNewReaction = (reaction) => {
@@ -20,19 +32,7 @@ const ReactionBar = ({ battleId, fingerprint, socket }) => {
                 socket.off('battle:new_reaction', handleNewReaction);
             };
         }
-    }, [battleId, socket]);
-
-    const triggerAnimation = (emoji) => {
-        const id = Date.now() + Math.random();
-        // Spaced out X positions
-        const xPos = 10 + Math.random() * 80;
-        setAnimations(prev => [...prev, { id, emoji, x: xPos }]);
-
-        // Cleanup after animation finishes
-        setTimeout(() => {
-            setAnimations(prev => prev.filter(anim => anim.id !== id));
-        }, 3000);
-    };
+    }, [battleId, socket, triggerAnimation]);
 
     const handleReaction = async (emoji) => {
         // Optimistic UI update for ourselves

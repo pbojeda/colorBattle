@@ -1,0 +1,20 @@
+{
+    "name": "color-battle-root",
+    "private": true,
+    "scripts": {
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "husky": "^9.1.7",
+        "lint-staged": "^15.5.2"
+    },
+    "lint-staged": {
+        "backend/**/*.js": [
+            "npm test --prefix backend -- --findRelatedTests"
+        ],
+        "frontend/**/*.{js,jsx,ts,tsx}": [
+            "npm run lint:files --prefix frontend --",
+            "npm test --prefix frontend -- related"
+        ]
+    }
+}

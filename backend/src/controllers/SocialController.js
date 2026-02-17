@@ -53,6 +53,10 @@ exports.postComment = async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        if (content.length > 200) {
+            return res.status(400).json({ error: 'Character limit exceeded (max 200)' });
+        }
+
         let finalNickname = providedNickname;
 
         // Validation/Generation Logic

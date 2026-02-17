@@ -24,5 +24,7 @@ jobs:
         node-version: '22.x'
     - name: Install dependencies
       run: npm install
+    - name: Run Tests
+      run: npm test
     - name: Check Syntax
       run: node --check server.js

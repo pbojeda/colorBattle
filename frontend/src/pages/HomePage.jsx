@@ -13,6 +13,8 @@ function HomePage() {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
 
+    const [error, setError] = useState(null);
+
     // Form State
     const [newBattleName, setNewBattleName] = useState('');
     const [option1, setOption1] = useState('');
@@ -25,10 +27,17 @@ function HomePage() {
     useEffect(() => {
         // Initial Fetch Sequence
         const init = async () => {
-            const trending = await fetchTrending();
-            const excludeIds = trending ? trending.map(b => b.battleId) : [];
-            await fetchRecent(1, excludeIds);
-            setLoading(false);
+            setError(null);
+            try {
+                const trending = await fetchTrending();
+                const excludeIds = trending ? trending.map(b => b.battleId) : [];
+                await fetchRecent(1, excludeIds);
+            } catch (err) {
+                console.error("Init failed:", err);
+                setError(err.message || "Failed to load battles");
+            } finally {
+                setLoading(false);
+            }
         };
         init();
     }, []);
@@ -40,6 +49,7 @@ function HomePage() {
             return res.data; // Return for chaining
         } catch (error) {
             console.error("Error fetching trending:", error);
+            // Trending failure is non-critical, don't throw
             return [];
         }
     };
@@ -63,6 +73,7 @@ function HomePage() {
             setRecentBattles(prev => pageNum === 1 ? newBattles : [...prev, ...newBattles]);
         } catch (error) {
             console.error("Error fetching battles:", error);
+            if (pageNum === 1) throw new Error("No se pudo conectar con el servidor. Verifica tu conexión.");
         }
     };
 
@@ -96,7 +107,30 @@ function HomePage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-black text-white flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-bg-gray-800 border-t-2 border-b-2 border-white"></div>
+                <div
+                    role="status"
+                    aria-label="Cargando"
+                    className="animate-spin rounded-full h-12 w-12 border-t-bg-gray-800 border-t-2 border-b-2 border-white"
+                ></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 text-center">
+                <div className="text-4xl mb-4">⚠️</div>
+                <h2 className="text-xl font-bold mb-2">Error de Conexión</h2>
+                <p className="text-gray-400 mb-6 max-w-md">{error}</p>
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition-colors"
+                    >
+                        Recargar Página
+                    </button>
+                    <p className="text-xs text-gray-500 mt-2">Server: {API_URL}</p>
+                </div>
             </div>
         );
     }

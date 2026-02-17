@@ -30,6 +30,12 @@ The backend API for ColorBattle, built with Node.js, Express, and MongoDB.
     npm start
     ```
 
+4.  **Test**:
+    ```bash
+    npm test
+    ```
+    Runs Jest unit and integration tests.
+
 4.  **Seed Data**:
     ```bash
     npm run seed

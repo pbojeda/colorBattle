@@ -115,6 +115,7 @@ class BattleController {
                 battleId: newBattle.battleId,
                 name: newBattle.name,
                 theme: newBattle.theme,
+                options: newBattle.options,
                 message: 'Battle created successfully'
             });
         } catch (err) {

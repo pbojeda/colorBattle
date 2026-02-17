@@ -150,7 +150,7 @@ function BattlePage() {
     if (!battleData) return <div className="text-white">Failed to load battle.</div>;
 
     return (
-        <div className="relative h-screen w-screen overflow-hidden">
+        <div className="fixed inset-0 w-screen overflow-hidden">
             {/* Social Components */}
             {socket && deviceId && (
                 <>
